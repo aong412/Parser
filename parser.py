@@ -75,7 +75,7 @@ class Parser:
                 self._report_syntax_error('missing parenthesis')
             return node
         token = self._next_token()
-        if token and isinstance(token, int):
+        if isinstance(token, int):
             del self._tokens[0]
             return LeafNode(token)
         self._report_syntax_error_at_next_token()

@@ -25,3 +25,8 @@ class TestExpressionTree:
         root = LeafNode(150)
         tree = ExpressionTree(root)
         assert tree.evaluate() == 150, str(tree)
+
+    def test_zero(self):
+        root = LeafNode(0)
+        tree = ExpressionTree(root)
+        assert tree.evaluate() == 0, str(tree)

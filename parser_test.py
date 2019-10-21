@@ -16,6 +16,12 @@ class TestParser:
         tree = self.parse_expression(expression)
         return tree.evaluate()
 
+    def test_number(self):
+        assert self.evaluate_expression("12") == 12
+
+    def test_zero(self):
+        assert self.evaluate_expression("0") == 0
+
     def test_addition(self):
         assert self.evaluate_expression("1+1") == 2
 

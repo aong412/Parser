@@ -81,8 +81,8 @@ class LeafNode(Node):
     """Represents a leaf (term) node."""
 
     def __init__(self, value):
+        assert isinstance(value, int)
         super().__init__(value, None, None)
 
     def evaluate(self):
-        assert self.data
         return int(self.data)
