@@ -50,26 +50,22 @@ class TestParser:
     def test_para_order3(self):
         assert self.evaluate_expression("1 * 4 + ( 5 * 2 )") == 14
 
-    # def test_bad_para(self):
-    #     expression = "( 2 * 2 "
-    #     with pytest.raises(ValueError, match='Missing Parenthesis'):
-    #         self.evaluate_tree(self.build_tree(expression))
-    #
-    # def test_bad_char(self):
-    #     expression = "&"
-    #     with pytest.raises(ValueError, match='Bad Format'):
-    #         self.evaluate_tree(self.build_tree(expression))
-    #
-    # def test_missing_operand(self):
-    #     expression = "22 + "
-    #     assert self.evaluate_tree(self.build_tree(expression)) is 22
-    #
-    # def test_bad_operator(self):
-    #     expression = "2 & 3 "
-    #     with pytest.raises(ValueError, match='Bad Format'):
-    #         self.evaluate_tree(self.build_tree(expression))
-    #
-    # def test_missing_operands(self):
-    #     expression = "+"
-    #     with pytest.raises(ValueError, match='Bad Format'):
-    #         self.evaluate_tree(self.build_tree(expression))
+    def test_bad_para(self):
+        with pytest.raises(ValueError, match='syntax error: missing parenthesis'):
+            self.evaluate_expression("( 2 * 2 ")
+
+    def test_bad_char(self):
+        with pytest.raises(ValueError, match='syntax error: unexpected token: &'):
+            self.evaluate_expression("&")
+
+    def test_missing_operand(self):
+        with pytest.raises(ValueError, match='syntax error: unexpected end of expression'):
+            self.evaluate_expression("22 +")
+
+    def test_bad_operator(self):
+        with pytest.raises(ValueError, match='syntax error: unexpected token: &'):
+            self.evaluate_expression("2 & 3")
+
+    def test_missing_operands(self):
+        with pytest.raises(ValueError, match='syntax error: unexpected end of expression'):
+            self.evaluate_expression("+")

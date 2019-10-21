@@ -55,16 +55,22 @@ class Parser:
             return None
         return self._tokens[0]
 
-    def _syntax_error(self):
-        """Raises a syntax error."""
-        raise ValueError("syntax error near token: %s" % self._next_token())
+    def _report_syntax_error(self, message):
+        """Raises a syntax error with message."""
+        raise ValueError("syntax error: %s" % message)
+
+    def _report_syntax_error_at_next_token(self):
+        """Raises a syntax error at next token."""
+        if self._tokens:
+            raise self._report_syntax_error("unexpected token: %s" % self._next_token())
+        raise self._report_syntax_error("unexpected end of expression")
 
     def _parse_next_term(self):
         """Parses either a bracketed group or a number."""
         if self._pop_token('('):
             node = self._parse_next_sum()
             if not self._pop_token(')'):
-                raise ValueError('Missing Parenthesis')
+                self._report_syntax_error('missing parenthesis')
             return node
         token = self._next_token()
         if token and token.isdigit():
@@ -72,7 +78,7 @@ class Parser:
             return LeafNode(token)
         if self._validate_next_token():
             return None
-        self._syntax_error()
+        self._report_syntax_error_at_next_token()
 
     def _parse_next_sum(self):
         """Parses a potential sum."""
@@ -80,20 +86,24 @@ class Parser:
         term = self._parse_next_product()
         if self._pop_token('+'):
             expr = self._parse_next_sum()
+            if not expr:
+                self._report_syntax_error_at_next_token()
             return InteriorNode('+', term, expr)
         if self._validate_next_token():
             return term
-        self._syntax_error()
+        self._report_syntax_error_at_next_token()
 
     def _parse_next_product(self):
         """Parses a potential product."""
         term = self._parse_next_term()
         if self._pop_token('*'):
             expr = self._parse_next_product()
+            if not expr:
+                self._report_syntax_error_at_next_token()
             return InteriorNode('*', term, expr)
         if self._validate_next_token():
             return term
-        self._syntax_error()
+        self._report_syntax_error_at_next_token()
 
     def parse(self):
         """Parses the given expression and returns an ExpressionTree.
