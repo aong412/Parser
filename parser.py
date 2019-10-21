@@ -4,6 +4,7 @@
 
 from expression_tree import ExpressionTree, InteriorNode, LeafNode
 
+
 class Parser:
     """Parses an arithmetic expression as specified by interviewer."""
 
@@ -15,7 +16,7 @@ class Parser:
     @property
     def expression(self):
         """Returns the expression provided to the parser."""
-        return self._expression;
+        return self._expression
 
     def _tokenize(self):
         """Tokenizes expression into self._tokens."""

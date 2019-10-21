@@ -3,7 +3,6 @@
 # Be sure to use Python3+
 
 import pytest
-from expression_tree import ExpressionTree, InteriorNode, LeafNode
 from parser import Parser
 
 
