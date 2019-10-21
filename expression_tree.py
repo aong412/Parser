@@ -2,7 +2,7 @@
 # Arithmetic Parser for Plexsys by Angela Ong
 # Be sure to use Python3+
 
-class Tree:
+class ExpressionTree:
     """Represents an expression tree."""
     def __init__(self, root):
         self._root = root
