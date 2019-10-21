@@ -5,6 +5,7 @@
 from expression_tree import ExpressionTree, InteriorNode, LeafNode
 
 class Parser:
+    """Parses an arithmetic expression as specified by interviewer."""
 
     def __init__(self, expression):
         self._expression = expression
@@ -18,24 +19,24 @@ class Parser:
 
     def _tokenize(self):
         """Tokenizes expression into self._tokens."""
-        # TODO: Smarter tokenization.
-        self._tokens = self._expression.split()
-
-    def _validate_next_token(self):
-        """Checks whether next token is valid, or at end of expression.
-
-        Returns:
-            True if next token is valid or parser is at the end of expression.
-            False if the next token is not valid.
-        """
-        token = self._next_token()
-        if not token:
-            return True
-        if token.isdigit():
-            return True
-        if token in "()+*":
-            return True
-        return False
+        tokens = []
+        index = 0
+        while index < len(self._expression):
+            c = self._expression[index]
+            if c.isspace():
+                pass
+            elif c in "+*()":
+                tokens.append(c)
+            elif c.isdigit():
+                value = int(c)
+                if tokens and isinstance(tokens[-1], int):
+                    tokens[-1] = tokens[-1] * 10 + value
+                else:
+                    tokens.append(value)
+            else:
+                self._report_syntax_error("unexpected token at index %d: %s" % (index, c))
+            index += 1
+        self._tokens = tokens
 
     def _pop_token(self, expected):
         """Pops the expected character from self._tokens if matching.
@@ -73,7 +74,7 @@ class Parser:
                 self._report_syntax_error('missing parenthesis')
             return node
         token = self._next_token()
-        if token and token.isdigit():
+        if token and isinstance(token, int):
             del self._tokens[0]
             return LeafNode(token)
         self._report_syntax_error_at_next_token()
@@ -85,8 +86,6 @@ class Parser:
         if self._pop_token('+'):
             expr = self._parse_next_sum()
             return InteriorNode('+', term, expr)
-        if not self._validate_next_token():
-            self._report_syntax_error_at_next_token()
         return term
 
     def _parse_next_product(self):
@@ -95,8 +94,6 @@ class Parser:
         if self._pop_token('*'):
             expr = self._parse_next_product()
             return InteriorNode('*', term, expr)
-        if not self._validate_next_token():
-            self._report_syntax_error_at_next_token()
         return term
 
     def parse(self):
