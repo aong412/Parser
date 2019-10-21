@@ -60,7 +60,7 @@ class InteriorNode(Node):
     """Represents an interior (operator) node."""
 
     def __init__(self, operator, left, right):
-        super(operator, left, right)
+        super().__init__(operator, left, right)
 
     def evaluate(self):
         assert self.left and self.right
@@ -81,7 +81,7 @@ class LeafNode(Node):
     """Represents a leaf (term) node."""
 
     def __init__(self, value):
-        super(value, None, None)
+        super().__init__(value, None, None)
 
     def evaluate(self):
         assert self.data
