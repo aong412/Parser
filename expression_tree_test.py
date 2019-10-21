@@ -1,6 +1,9 @@
+#!/usr/bin/python
+# Arithmetic Parser for Plexsys by Angela Ong
+# Be sure to use Python3+
+
 import pytest
 from expression_tree import ExpressionTree, InteriorNode, LeafNode
-
 
 class TestExpressionTree:
 

@@ -2,97 +2,113 @@
 # Arithmetic Parser for Plexsys by Angela Ong
 # Be sure to use Python3+
 
+from expression_tree import ExpressionTree, InteriorNode, LeafNode
 
-# Tree class
-class Tree:
-    def __init__(self, cargo, left=None, right=None):
-        self.cargo = cargo
-        self.left = left
-        self.right = right
+class Parser:
 
-    def __str__(self):
-        return str(self.cargo)
+    def __init__(self, expression):
+        self._expression = expression
+        self._parsed_value = None
+        self._tokens = None
 
+    @property
+    def expression(self):
+        """Returns the expression provided to the parser."""
+        return self._expression;
 
-# preorder tree printing
-def print_tree(tree):
-    if tree is None: return
-    print(tree.cargo)
-    print_tree(tree.left)
-    print_tree(tree.right)
+    def _tokenize(self):
+        """Tokenizes expression into self._tokens."""
+        # TODO: Smarter tokenization.
+        self._tokens = self._expression.split()
 
+    def _validate_next_token(self):
+        """Checks whether next token is valid, or at end of expression.
 
-# confirm token operator validity
-def validate(token):
-    if token.isdigit() or token == '(' or token == ')' or token == '+' or \
-        token == '*' or token == 'end': return True
-    else: raise ValueError('Bad Format')
-
-
-# handle operands
-def get_number(exp_list):
-    if match(exp_list, '('):
-        x = get_sum(exp_list)
-        if not match(exp_list, ')'):
-            raise ValueError('Missing Parenthesis')
-        return x
-    else:
-        x = exp_list[0]
-        if x.isdigit():
-            exp_list[0:1] = []
-            return Tree(x, None, None)
-
-        if validate(x): return None
-
-
-# build tree for sums; products before sums ****
-def get_sum(exp_list):
-    a = get_product(exp_list)
-    if match(exp_list, '+'):
-        b = get_sum(exp_list)
-        return Tree('+', a, b)
-    if validate(exp_list[0]): return a
-
-
-# build tree for products
-def get_product(exp_list):
-    a = get_number(exp_list)
-    if match(exp_list, '*'):
-        b = get_product(exp_list)
-        return Tree('*', a, b)
-    if validate(exp_list[0]): return a
-
-
-# match for expected character and pop from list
-def match(exp_list, expected):
-    if exp_list[0] == expected:
-        del exp_list[0]
-        return True
-    else:
+        Returns:
+            True if next token is valid or parser is at the end of expression.
+            False if the next token is not valid.
+        """
+        token = self._next_token()
+        if not token:
+            return True
+        if token.isdigit():
+            return True
+        if token in "()+*":
+            return True
         return False
 
+    def _pop_token(self, expected):
+        """Pops the expected character from self._tokens if matching.
 
-# use recursion to get arithmetic result of tree
-def evaluate_tree(root):
-    # empty tree
-    if root is None:
-        return 0
+        Returns:
+            True if expected matches the next token, False otherwise.
+        """
+        if self._tokens and self._tokens[0] == expected:
+            del self._tokens[0]
+            return True
+        else:
+            return False
 
-    # leaf node
-    if root.left is None and root.right is None:
-        # bug here if the expression string is "+/*/)"
-        return int(root.cargo)
+    def _next_token(self):
+        """Returns the next token in self._tokens."""
+        if not self._tokens:
+            return None
+        return self._tokens[0]
 
-    # evaluate left tree
-    left_sum = evaluate_tree(root.left)
+    def _syntax_error(self):
+        """Raises a syntax error."""
+        raise ValueError("syntax error near token: %s" % self._next_token())
 
-    # evaluate right tree
-    right_sum = evaluate_tree(root.right)
+    def _parse_next_term(self):
+        """Parses either a bracketed group or a number."""
+        if self._pop_token('('):
+            node = self._parse_next_sum()
+            if not self._pop_token(')'):
+                raise ValueError('Missing Parenthesis')
+            return node
+        token = self._next_token()
+        if token and token.isdigit():
+            del self._tokens[0]
+            return LeafNode(token)
+        if self._validate_next_token():
+            return None
+        self._syntax_error()
 
-    # check which operation to apply
-    if root.cargo == '+':
-        return left_sum + right_sum
-    elif root.cargo == '*':
-        return left_sum * right_sum
-    else:
-        raise ValueError('Operator not found')
+    def _parse_next_sum(self):
+        """Parses a potential sum."""
+        # Products have greater precedence.
+        term = self._parse_next_product()
+        if self._pop_token('+'):
+            expr = self._parse_next_sum()
+            return InteriorNode('+', term, expr)
+        if self._validate_next_token():
+            return term
+        self._syntax_error()
+
+    def _parse_next_product(self):
+        """Parses a potential product."""
+        term = self._parse_next_term()
+        if self._pop_token('*'):
+            expr = self._parse_next_product()
+            return InteriorNode('*', term, expr)
+        if self._validate_next_token():
+            return term
+        self._syntax_error()
+
+    def parse(self):
+        """Parses the given expression and returns an ExpressionTree.
+
+        Returns:
+            An ExpressionTree of the provided expression.
+        Raises:
+            ValueError on invalid syntax.
+        """
+        if self._parsed_value:
+            return self._parsed_value
+        self._tokenize()
+        # Entry point is self._parse_next_sum() because we want to
+        # obey operator precedence, and the sum parser first tries
+        # to parse a product.
+        root = self._parse_next_sum()
+        self._parsed_value = ExpressionTree(root)
+        return self._parsed_value
