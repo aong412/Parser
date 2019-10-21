@@ -2,7 +2,7 @@
 # Arithmetic Parser for Plexsys by Angela Ong
 # Be sure to use Python3+
 
-from Parser import get_sum, evaluate_tree
+from parser import get_sum, evaluate_tree
 
 while True:
     # Get expression
