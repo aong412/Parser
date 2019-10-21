@@ -76,8 +76,6 @@ class Parser:
         if token and token.isdigit():
             del self._tokens[0]
             return LeafNode(token)
-        if self._validate_next_token():
-            return None
         self._report_syntax_error_at_next_token()
 
     def _parse_next_sum(self):
@@ -86,24 +84,20 @@ class Parser:
         term = self._parse_next_product()
         if self._pop_token('+'):
             expr = self._parse_next_sum()
-            if not expr:
-                self._report_syntax_error_at_next_token()
             return InteriorNode('+', term, expr)
-        if self._validate_next_token():
-            return term
-        self._report_syntax_error_at_next_token()
+        if not self._validate_next_token():
+            self._report_syntax_error_at_next_token()
+        return term
 
     def _parse_next_product(self):
         """Parses a potential product."""
         term = self._parse_next_term()
         if self._pop_token('*'):
             expr = self._parse_next_product()
-            if not expr:
-                self._report_syntax_error_at_next_token()
             return InteriorNode('*', term, expr)
-        if self._validate_next_token():
-            return term
-        self._report_syntax_error_at_next_token()
+        if not self._validate_next_token():
+            self._report_syntax_error_at_next_token()
+        return term
 
     def parse(self):
         """Parses the given expression and returns an ExpressionTree.

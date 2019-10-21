@@ -42,13 +42,13 @@ class TestParser:
         assert self.evaluate_expression("3 + 4 * 6") == 27
 
     def test_op_order2(self):
-        assert self.evaluate_expression("3 * 4 + 6") == 18
+        assert self.evaluate_expression("3 * 4 + 6 * 8") == 60
 
     def test_para_order2(self):
         assert self.evaluate_expression("1 * ( 4 + 5 ) * 2") == 18
 
     def test_para_order3(self):
-        assert self.evaluate_expression("1 * 4 + ( 5 * 2 )") == 14
+        assert self.evaluate_expression("1 * 4 + ( 5 * ( 2 * 13 ) )") == 134
 
     def test_bad_para(self):
         with pytest.raises(ValueError, match='syntax error: missing parenthesis'):
@@ -62,10 +62,14 @@ class TestParser:
         with pytest.raises(ValueError, match='syntax error: unexpected end of expression'):
             self.evaluate_expression("22 +")
 
+    def test_missing_operand2(self):
+        with pytest.raises(ValueError, match='syntax error: unexpected token: +'):
+            self.evaluate_expression("+ 22")
+
     def test_bad_operator(self):
         with pytest.raises(ValueError, match='syntax error: unexpected token: &'):
             self.evaluate_expression("2 & 3")
 
     def test_missing_operands(self):
-        with pytest.raises(ValueError, match='syntax error: unexpected end of expression'):
+        with pytest.raises(ValueError, match='syntax error: unexpected token: +'):
             self.evaluate_expression("+")
